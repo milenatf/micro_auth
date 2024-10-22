@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Traits\UuidTrait;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -10,7 +11,11 @@ use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
 {
-    use HasApiTokens, HasFactory, Notifiable;
+    use HasApiTokens, HasFactory, UuidTrait, Notifiable;
+
+    public $incrementing = false;
+    protected $keyType = 'string'; // Tipo da chave primária é string
+    protected $primaryKey = 'uuid'; // Define 'uuid' como a chave primária
 
     /**
      * The attributes that are mass assignable.
