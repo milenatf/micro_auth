@@ -1,0 +1,46 @@
+# version: "3.7"
+services:
+  # image project
+  micro_auth_app:
+    build:
+      args:
+        user: milena
+        uid: 1000
+      context: .
+      dockerfile: Dockerfile
+    working_dir: /var/www/
+    volumes:
+      - ./:/var/www
+    networks:
+      - micro_auth_network
+
+  # nginx
+  micro_auth_nginx:
+    image: nginx:alpine
+    ports:
+      - "8383:80"
+    volumes:
+      - ./:/var/www
+      - ./docker/nginx/:/etc/nginx/conf.d/
+    networks:
+      - micro_auth_network
+
+  # db mysql
+  db_micro_auth:
+    image: mysql:8.0
+    platform: linux/x86_64
+    environment:
+      MYSQL_DATABASE: ${DB_DATABASE:-laravel}
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-root}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-userpass}
+      MYSQL_USER: ${DB_USERNAME:-username}
+    volumes:
+      - ./.docker/mysql/dbdata:/var/lib/mysql
+    ports:
+      - "3333:3306"
+    networks:
+      - micro_auth_network
+
+networks:
+  micro_auth_network:
+    driver: bridge
