@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "9c491b8531eec05ba41a11d9276a5749",
+    "content-hash": "f5583f6ad07138411dfebf92a3672268",
     "packages": [
         {
             "name": "brick/math",
@@ -1887,6 +1887,43 @@
                 }
             ],
             "time": "2024-09-21T08:32:55+00:00"
+        },
+        {
+            "name": "milenatf/microservices-common",
+            "version": "1.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/milenatf/laravel_package.git",
+                "reference": "8d8b7a0cbf5735edfa9c85de9148d95ea17130ea"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/milenatf/laravel_package/zipball/8d8b7a0cbf5735edfa9c85de9148d95ea17130ea",
+                "reference": "8d8b7a0cbf5735edfa9c85de9148d95ea17130ea",
+                "shasum": ""
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Milenatf\\MicroservicesCommon\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Milena Tavares",
+                    "email": "milena.devweb@gmail.com"
+                }
+            ],
+            "description": "Package Files Utils Microservice Course",
+            "support": {
+                "issues": "https://github.com/milenatf/laravel_package/issues",
+                "source": "https://github.com/milenatf/laravel_package/tree/1.0.0"
+            },
+            "time": "2024-10-10T18:54:32+00:00"
         },
         {
             "name": "monolog/monolog",
