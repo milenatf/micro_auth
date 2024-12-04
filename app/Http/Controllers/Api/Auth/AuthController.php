@@ -8,14 +8,20 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
+use App\Services\MicroApplication\MicroApplicationService;
+use Exception;
 
 class AuthController extends Controller
 {
     private $model;
+    private $microApplicationService;
 
-    public function __construct(User $user)
-    {
+    public function __construct(
+        User $user,
+        MicroApplicationService $microApplicationService
+    ) {
         $this->model = $user;
+        $this->microApplicationService = $microApplicationService;
     }
 
     public function login(AuthUser $request)
@@ -32,13 +38,28 @@ class AuthController extends Controller
         $token = $user->createToken($request->device_name)->plainTextToken;
         $user['token'] = $token;
 
-        return response()->json([
-            'data' => $user
-        ]);
+        try {
+
+            $this->microApplicationService->auth($user->id);
+
+            return response()->json([
+                'data' => $user->makeHidden(['created_at', 'updated_at'])
+            ]);
+
+        } catch (Exception $e) {
+
+            return response()->json([
+                'status' => 'error',
+                'mensagem' => 'Não foi possível autenticar no microserviço application.',
+                'erro' => $e->getMessage()
+            ], 500);
+
+        }
     }
 
     public function me()
     {
+        /** @var User $authUser */
         $authUser = auth()->user();
 
         if(!$authUser) {
@@ -48,7 +69,7 @@ class AuthController extends Controller
             ], 404);
         }
 
-        return response()->json($authUser);
+        return response()->json($authUser->makeHidden(['created_at', 'updated_at']));
     }
 
     public function logout()

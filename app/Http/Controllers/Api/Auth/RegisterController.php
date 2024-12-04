@@ -28,7 +28,7 @@ class RegisterController extends Controller
         $user['token'] = $token;
 
         return response()->json([
-            'data' => $user
+            'data' => $user->makeHidden(['created_at', 'updated_at'])
         ]);
     }
 }
