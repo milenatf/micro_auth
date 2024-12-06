@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 use App\Services\MicroApplication\MicroApplicationService;
 use Exception;
+use Illuminate\Support\Facades\Log;
 
 class AuthController extends Controller
 {
@@ -29,38 +30,25 @@ class AuthController extends Controller
         $user = $this->model::where('email', $request->email)->first();
 
         if (! $user || ! Hash::check($request->password, $user->password)) {
-            throw ValidationException::withMessages([
-                'email' => ['The provided credentials are incorrect.'],
-            ]);
+            return response()->json([
+                'status' => 'erro',
+                'mensagem' => 'Email e/ou senha estão incorretos.'
+            ], 422);
         }
 
-        // Cria o token de acesso do usuário
-        $token = $user->createToken($request->device_name)->plainTextToken;
-        $user['token'] = $token;
+        $token = $user->createToken($request->device_name);
+        $user['token'] = $token->plainTextToken;
 
-        try {
-
-            $this->microApplicationService->auth($user->id);
-
-            return response()->json([
-                'data' => $user->makeHidden(['created_at', 'updated_at'])
-            ]);
-
-        } catch (Exception $e) {
-
-            return response()->json([
-                'status' => 'error',
-                'mensagem' => 'Não foi possível autenticar no microserviço application.',
-                'erro' => $e->getMessage()
-            ], 500);
-
-        }
+        return response()->json([
+            'user' => $user,
+        ]);
     }
 
     public function me()
     {
         /** @var User $authUser */
         $authUser = auth()->user();
+        dd($authUser);
 
         if(!$authUser) {
             return response()->json([
@@ -88,5 +76,20 @@ class AuthController extends Controller
             'status' => 'success',
             'message' => 'Logout completed successfully'
         ], 200);
+    }
+
+    public function validateToken()
+    {
+        try {
+            $user = auth()->user();
+
+            if (!$user) {
+                return response()->json(['error' => 'Invalid token'], 401);
+            }
+            return response()->json(['user' => $user], 200);
+        } catch (Exception $e) {
+            Log::error('Erro ao validar o token:', ['message' => $e->getMessage()]);
+            return response()->json(['error' => 'Internal Server Error'], 500);
+        }
     }
 }
