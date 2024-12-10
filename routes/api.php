@@ -22,9 +22,9 @@ Route::post('/register', [RegisterController::class, 'store']);
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/validate-token', [AuthController::class, 'validateToken']);
     Route::get('/me', [AuthController::class, 'me']);
-    Route::post('/logout', [AuthController::class, 'logout']);
+    Route::get('/logout', [AuthController::class, 'logout']);
 });
 
 Route::get('/', function() {
-    return response()->json(['message' => 'OKaaaaa']);
+    return response()->json(['message' => 'Ok']);
 });

@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Api\Auth;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\StoreUser;
 use App\Models\User;
-use Illuminate\Http\Request;
+use Exception;
 
 class RegisterController extends Controller
 {
@@ -21,7 +21,17 @@ class RegisterController extends Controller
         $data = $request->validated();
 
         $data['password'] = bcrypt($data['password']);
-        $user = $this->model->create($data);
+
+        try {
+
+            $user = $this->model->create($data);
+
+        } catch(Exception $e) {
+            return response()->json([
+                'status'=> 'failed',
+                'message' => 'Não foi possível realizar o cadastro.'
+            ], 500);
+        }
 
         // Cria o token de acesso do usuário
         $token = $user->createToken($request->device_name)->plainTextToken;

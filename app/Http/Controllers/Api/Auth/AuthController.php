@@ -5,9 +5,7 @@ namespace App\Http\Controllers\Api\Auth;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\AuthUser;
 use App\Models\User;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Validation\ValidationException;
 use App\Services\MicroApplication\MicroApplicationService;
 use Exception;
 use Illuminate\Support\Facades\Log;
@@ -36,8 +34,10 @@ class AuthController extends Controller
             ], 422);
         }
 
-        $token = $user->createToken($request->device_name);
-        $user['token'] = $token->plainTextToken;
+        $user->tokens()->delete(); // Exclui todos os tokens do usuário
+
+        // Cria o token de acesso, adicionando 24 hora de expiração
+        $user['token'] = $user->createToken($request->header('User-Agent'), ['*'], now()->addMinutes(1440))->plainTextToken;
 
         return response()->json([
             'user' => $user,
@@ -48,7 +48,6 @@ class AuthController extends Controller
     {
         /** @var User $authUser */
         $authUser = auth()->user();
-        dd($authUser);
 
         if(!$authUser) {
             return response()->json([
@@ -68,13 +67,13 @@ class AuthController extends Controller
         if(!$authUser->tokens()->delete()) {
             return response()->json([
                 'status'=> 'failed',
-                'message' => 'Unable to log out!'
+                'message' => 'Não foi possível realizar o logout.'
             ], 400);
         }
 
         return response()->json([
             'status' => 'success',
-            'message' => 'Logout completed successfully'
+            'message' => 'Logout realizado com sucesso.'
         ], 200);
     }
 

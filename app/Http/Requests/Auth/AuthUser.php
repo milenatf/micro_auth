@@ -23,8 +23,7 @@ class AuthUser extends FormRequest
     {
         return [
             'email' => ['required', 'email', 'max:255'],
-            'password' => ['required', 'min:4', 'max:16'],
-            'device_name' => ['required', 'string', 'max:255']
+            'password' => ['required', 'min:4', 'max:16']
         ];
     }
 }
