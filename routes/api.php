@@ -26,5 +26,5 @@ Route::middleware('auth:sanctum')->group(function () {
 });
 
 Route::get('/', function() {
-    return response()->json(['message' => 'Ok']);
+    return response()->json(['message' => 'Rota raiz micro auth']);
 });

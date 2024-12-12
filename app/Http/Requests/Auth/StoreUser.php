@@ -3,6 +3,8 @@
 namespace App\Http\Requests\Auth;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Http\Exceptions\HttpResponseException;
+use Illuminate\Contracts\Validation\Validator;
 
 class StoreUser extends FormRequest
 {
@@ -22,10 +24,25 @@ class StoreUser extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => ['required', 'string', 'unique:users', 'min:3', 'max:100'],
+            'name' => ['required', 'string', 'min:3', 'max:100'],
             'password' => ['required', 'min:4', 'max:16'],
-            'email' => ['required', 'email', 'max:255'],
+            'email' => ['required', 'email', 'max:255', 'unique:users'],
+            'is_teacher' => ['required', 'boolean'],
             'device_name' => ['required', 'string', 'max:255']
         ];
+    }
+
+    /**
+     * Sobrescreve o método failedValidation na classe StoreUser para capturar os erros e manipulá-los.
+     * Dessa forma os erros de validação são enviados para o microserviço application para que sejam exibidos lá
+     *
+     * @param Validator $validator
+     * @return void
+     */
+    protected function failedValidation(Validator $validator)
+    {
+        throw new HttpResponseException(
+            response()->json(['errors' => $validator->errors()], 422)
+        );
     }
 }
