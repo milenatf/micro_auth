@@ -2,7 +2,9 @@
 
 namespace App\Http\Requests\Auth;
 
+use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Http\Exceptions\HttpResponseException;
 
 class AuthUser extends FormRequest
 {
@@ -25,5 +27,12 @@ class AuthUser extends FormRequest
             'email' => ['required', 'email', 'max:255'],
             'password' => ['required', 'min:4', 'max:16']
         ];
+    }
+
+    protected function failedValidation(Validator $validator)
+    {
+        throw new HttpResponseException(
+            response()->json(['errors' => $validator->errors()], 422)
+        );
     }
 }

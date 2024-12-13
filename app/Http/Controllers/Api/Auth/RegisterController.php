@@ -25,7 +25,7 @@ class RegisterController extends Controller
         $data['password'] = bcrypt($data['password']);
 
         try {
-            // $user = $this->model->create($data);
+
             return $this->model->create($data)->makeHidden(['created_at', 'updated_at']);
 
         } catch(Exception $e) {

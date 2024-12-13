@@ -40,7 +40,7 @@ class AuthController extends Controller
         $user['token'] = $user->createToken($request->header('User-Agent'), ['*'], now()->addMinutes(1440))->plainTextToken;
 
         return response()->json([
-            'user' => $user,
+            'data' => $user,
         ]);
     }
 
