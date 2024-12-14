@@ -11,6 +11,8 @@ services:
     working_dir: /var/www/
     volumes:
       - ./:/var/www
+    depends_on:
+      - micro_auth_redis
     networks:
       - micro_auth_network
 
@@ -38,6 +40,30 @@ services:
       - ./.docker/mysql/dbdata:/var/lib/mysql
     ports:
       - "3333:3306"
+    networks:
+      - micro_auth_network
+
+  # queue
+  micro_auth_queue:
+    build:
+      args:
+        user: milena
+        uid: 1000
+      context: .
+      dockerfile: Dockerfile
+    command: "php artisan queue:work"
+    volumes:
+      - ./:/var/www
+    depends_on:
+      - micro_auth_redis
+    networks:
+      - micro_auth_network
+
+  # redis
+  micro_auth_redis:
+    image: redis:latest
+    ports:
+      - "6373:6379"
     networks:
       - micro_auth_network
 
