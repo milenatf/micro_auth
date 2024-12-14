@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\StoreUser;
+use App\Jobs\UserRegisteredJob;
 use App\Models\User;
 use Exception;
 use Illuminate\Http\JsonResponse;
@@ -27,6 +28,12 @@ class RegisterController extends Controller
         try {
 
             return $this->model->create($data)->makeHidden(['created_at', 'updated_at']);
+
+            // if($newUser){
+            //     UserRegisteredJob::dispatch($newUser->email)->onQueue('queue_notification');
+            // }
+
+            // return $newUser;
 
         } catch(Exception $e) {
             return response()->json([
