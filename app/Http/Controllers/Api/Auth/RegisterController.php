@@ -5,42 +5,30 @@ namespace App\Http\Controllers\Api\Auth;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\StoreUser;
 use App\Jobs\UserRegisteredJob;
-use App\Models\User;
-use Exception;
-use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
+use App\Services\User\UserService;
 
 class RegisterController extends Controller
 {
-    private $model;
-
-    public function __construct(User $user)
-    {
-        $this->model = $user;
-    }
+    public function __construct(
+        private UserService $userService
+    ) { }
 
     public function store(StoreUser $request)
     {
         $data = $request->all();
         $data['password'] = bcrypt($data['password']);
 
-        try {
+        $newUser = $this->userService->createNewUser($data);
 
-            $newUser = $this->model->create($data)->makeHidden(['created_at', 'updated_at']);
-
-            if($newUser){
-                UserRegisteredJob::dispatch($newUser->email)->onQueue('queue_notification');
-            }
-
-            return $newUser;
-
-        } catch(Exception $e) {
+        if(!$newUser){
             return response()->json([
                 'status'=> 'failed',
                 'message' => 'Não foi possível realizar o cadastro.'
             ], 500);
         }
+        UserRegisteredJob::dispatch($newUser->email)->onQueue('queue_notification');
+
+        return $newUser;
 
         // Cria o token de acesso do usuário
         // $token = $user->createToken($request->device_name)->plainTextToken;

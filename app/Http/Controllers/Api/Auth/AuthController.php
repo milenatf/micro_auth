@@ -6,21 +6,17 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\AuthUser;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
-use App\Services\MicroApplication\MicroApplicationService;
 use Exception;
 use Illuminate\Support\Facades\Log;
 
 class AuthController extends Controller
 {
     private $model;
-    private $microApplicationService;
 
     public function __construct(
         User $user,
-        MicroApplicationService $microApplicationService
     ) {
         $this->model = $user;
-        $this->microApplicationService = $microApplicationService;
     }
 
     public function login(AuthUser $request)
