@@ -27,13 +27,13 @@ class RegisterController extends Controller
 
         try {
 
-            return $this->model->create($data)->makeHidden(['created_at', 'updated_at']);
+            $newUser = $this->model->create($data)->makeHidden(['created_at', 'updated_at']);
 
-            // if($newUser){
-            //     UserRegisteredJob::dispatch($newUser->email)->onQueue('queue_notification');
-            // }
+            if($newUser){
+                UserRegisteredJob::dispatch($newUser->email)->onQueue('queue_notification');
+            }
 
-            // return $newUser;
+            return $newUser;
 
         } catch(Exception $e) {
             return response()->json([
