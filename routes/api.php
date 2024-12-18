@@ -25,6 +25,7 @@ Route::post('/register', [RegisterController::class, 'store']);
  * Email Verification Routes
  */
 Route::get('/verify/{hash}', [EmailVerificationController::class, 'verify']);
+Route::post('/resend-email-verification', [EmailVerificationController::class, 'resendEmailVerification']);
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/validate-token', [AuthController::class, 'validateToken']);

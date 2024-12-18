@@ -4,15 +4,50 @@ namespace App\Http\Controllers\Api\EmailVerify;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Services\Auth\AuthService;
 use App\Services\EmailVerify\EmailVerificationService;
+use App\Services\User\UserService;
 use Illuminate\Http\Request;
 
 class EmailVerificationController extends Controller
 {
     public function __construct(
+        private AuthService $authService,
         private EmailVerificationService $service,
+        private UserService $userService,
         private User $userModel
     ) { }
+
+    public function resendEmailVerification(Request $request)
+    {
+        $user = $this->userService->getUserByEmail($request->email);
+
+        if(!$user) {
+            return response()->json([
+                'status' => 'failed',
+                'message' => 'E-mail não encontrado.'
+            ], 404);
+        }
+
+        // Verifica se o usuário já realizou a verificação de e-mail
+        if($user->email_verified_at) {
+            return response()->json([
+                'status' => 'failed',
+                'message' => "Este email já foi verificado."
+            ], 409);
+        }
+
+        $emailVerification = $this->service->getEmailVerificationByEmail($request->email);
+
+        if($emailVerification) $this->service->deleteEmailVerification($request->email);
+
+        $this->service->sendEmailVerification($request->email);
+
+
+
+    }
+
+
     public function verify(Request $request)
     {
         $token = $request->segment(2);
@@ -26,7 +61,7 @@ class EmailVerificationController extends Controller
             ], 400);
         }
 
-        $user = $this->userModel->where('email', $emailVerification->email)->first();
+        $user = $this->userService->getUserByEmail($emailVerification->email);
 
         if($user->email_verified_at) {
             return response()->json([

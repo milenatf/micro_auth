@@ -2,18 +2,29 @@
 
 namespace App\Services\EmailVerify;
 
+use App\Jobs\Auth\SendEmailVerificationJob;
 use App\Models\EmailVerify\EmailVerification;
-use Illuminate\Http\JsonResponse;
+use App\Services\Auth\AuthService;
 
 class EmailVerificationService
 {
     public function __construct(
         private EmailVerification $model,
+        private AuthService $authService
     ){ }
 
     public function getEmailVerificationByToken(string $token): null|object
     {
         $emailVerification = $this->model->where('token', $token)->first();
+
+        if (!$emailVerification) return null;
+
+        return $emailVerification;
+    }
+
+    public function getEmailVerificationByEmail(string $email): null|object
+    {
+        $emailVerification = $this->model->where('email', $email)->first();
 
         if (!$emailVerification) return null;
 
@@ -37,5 +48,18 @@ class EmailVerificationService
             return false;
 
         return true;
+    }
+
+    public function sendEmailVerification(string $email)
+    {
+        $linkVerification = $this->authService->createLinkVerification();
+
+        if($this->store($email, $linkVerification['hash'])) {
+            SendEmailVerificationJob::dispatch($email, $linkVerification['link'])->onQueue('queue_notification');
+
+            return true;
+        }
+
+        return false;
     }
 }
