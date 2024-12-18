@@ -1,4 +1,3 @@
-# version: "3.7"
 services:
   # image project
   micro_auth_app:
@@ -15,6 +14,7 @@ services:
       - micro_auth_redis
     networks:
       - micro_auth_network
+      - shared_network
 
   # nginx
   micro_auth_nginx:
@@ -43,22 +43,6 @@ services:
     networks:
       - micro_auth_network
 
-  # queue
-  micro_auth_queue:
-    build:
-      args:
-        user: milena
-        uid: 1000
-      context: .
-      dockerfile: Dockerfile
-    command: "php artisan queue:work"
-    volumes:
-      - ./:/var/www
-    depends_on:
-      - micro_auth_redis
-    networks:
-      - micro_auth_network
-
   # redis
   micro_auth_redis:
     image: redis:latest
@@ -67,6 +51,25 @@ services:
     networks:
       - micro_auth_network
 
+  # queue
+  micro_auth_queue:
+    build:
+      args:
+        user: milena
+        uid: 1000
+      context: .
+      dockerfile: Dockerfile
+    # command: "php artisan queue:work"
+    volumes:
+      - ./:/var/www
+    depends_on:
+      - micro_auth_redis
+    networks:
+      - micro_auth_network
+      - shared_network
+
 networks:
   micro_auth_network:
     driver: bridge
+  shared_network:
+    external: true
