@@ -1,8 +1,10 @@
 <?php
 
-use App\Http\Controllers\Api\Auth\AuthController;
-use App\Http\Controllers\Api\Auth\RegisterController;
-use Illuminate\Http\Request;
+use App\Http\Controllers\Api\ {
+    Auth\AuthController,
+    EmailVerify\EmailVerificationController,
+    Register\RegisterController
+};
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -18,6 +20,11 @@ use Illuminate\Support\Facades\Route;
 
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/register', [RegisterController::class, 'store']);
+
+/**
+ * Email Verification Routes
+ */
+Route::get('/verify/{hash}', [EmailVerificationController::class, 'verify']);
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/validate-token', [AuthController::class, 'validateToken']);

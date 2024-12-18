@@ -11,17 +11,21 @@ class AuthService
 
     public function __construct()
     {
-        $this->url_frontend = config('microApplication.url_frontend');
+        $this->url_frontend = config('app.url_frontend');
     }
-    public function createHashForEmailVerification(): string
+
+    private function createHashForEmailVerification(): string
     {
         return str_replace('/', '.', Hash::make(Str::random(256)));
     }
 
-    public function createLinkVerification(): string
+    public function createLinkVerification(): array
     {
         $hash = $this->createHashForEmailVerification();
 
-        return "{$this->url_frontend}/verify/{$hash}";
+        return [
+            'link' => "{$this->url_frontend}/verify/{$hash}",
+            'hash' => $hash
+        ];
     }
 }
