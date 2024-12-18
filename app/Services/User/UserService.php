@@ -5,6 +5,7 @@ namespace App\Services\User;
 use App\Models\User;
 use Exception;
 use App\DTO\User\StoreUserDTO;
+use Illuminate\Http\JsonResponse;
 
 class UserService
 {
@@ -12,16 +13,13 @@ class UserService
         private User $user
     ){ }
 
-    public function getUserbyEmail(string $email)
+    public function getUserByEmail(string $email): null|object
     {
         $user = $this->user->where('email', $email)->first();
 
-        if ($user->email_verified_at) {
-            return response()->json([
-                'status' => 'failed',
-                'message' => "This email {$user->email} has already been verified."
-            ]);
-        }
+        if(!$user) return null;
+
+        return $user->makeHidden(['created_at', 'updated_at']);
     }
 
     public function createNewUser(StoreUserDTO $request): User|null
