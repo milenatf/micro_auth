@@ -37,9 +37,9 @@ class EmailVerificationService
         $data['token'] = $hash;
         $data['expired_at'] = now()->addMinutes(60);
 
-        if(!$create = $this->model->create($data)) return null;
+        if(!$newEmailVerifications = $this->model->create($data)) return null;
 
-        return $create;
+        return $newEmailVerifications;
     }
 
     public function deleteEmailVerification(string $email): bool
@@ -50,9 +50,9 @@ class EmailVerificationService
         return true;
     }
 
-    public function sendEmailVerification(string $email)
+    public function sendEmailVerification(string $email): bool
     {
-        $linkVerification = $this->authService->createLinkVerification();
+        $linkVerification = $this->authService->createLinkVerification('verify');
 
         if($this->store($email, $linkVerification['hash'])) {
             SendEmailVerificationJob::dispatch($email, $linkVerification['link'])->onQueue('queue_notification');

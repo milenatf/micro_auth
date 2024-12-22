@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Api\EmailVerify;
 
 use App\Http\Controllers\Controller;
-use App\Models\User;
 use App\Services\Auth\AuthService;
 use App\Services\EmailVerify\EmailVerificationService;
 use App\Services\User\UserService;
@@ -14,8 +13,7 @@ class EmailVerificationController extends Controller
     public function __construct(
         private AuthService $authService,
         private EmailVerificationService $service,
-        private UserService $userService,
-        private User $userModel
+        private UserService $userService
     ) { }
 
     public function resendEmailVerification(Request $request)
@@ -43,7 +41,10 @@ class EmailVerificationController extends Controller
 
         $this->service->sendEmailVerification($request->email);
 
-
+        return response()->json([
+            'status' => 'success',
+            'message' => "Um novo link de verificação foi enviado para {$request->email}"
+        ], 201);
 
     }
 
@@ -63,7 +64,7 @@ class EmailVerificationController extends Controller
 
         $user = $this->userService->getUserByEmail($emailVerification->email);
 
-        if($user->email_verified_at) {
+        if($user->hasVerifiedEmail()) {
             return response()->json([
                 'status' => 'failed',
                 'message' => "Este email já foi verificado."

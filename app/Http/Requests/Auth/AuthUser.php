@@ -29,10 +29,17 @@ class AuthUser extends FormRequest
         ];
     }
 
-    protected function failedValidation(Validator $validator)
-    {
-        throw new HttpResponseException(
-            response()->json(['errors' => $validator->errors()], 422)
-        );
-    }
+    /**
+     * Sobrescreve o método failedValidation na classe StoreUser para capturar os erros e manipulá-los.
+     * Dessa forma os erros de validação são enviados para o microserviço application para que sejam exibidos lá
+     *
+     * @param Validator $validator
+     * @return void
+     */
+    // protected function failedValidation(Validator $validator)
+    // {
+    //     throw new HttpResponseException(
+    //         response()->json(['errors' => $validator->errors()], 422)
+    //     );
+    // }
 }

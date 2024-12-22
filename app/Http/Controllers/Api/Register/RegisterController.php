@@ -6,7 +6,6 @@ use App\DTO\User\StoreUserDTO;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Register\StoreUserRequest;
 use App\Jobs\Auth\SendEmailVerificationJob;
-use App\Jobs\UserRegisteredJob;
 use App\Services\Auth\AuthService;
 use App\Services\EmailVerify\EmailVerificationService;
 use App\Services\User\UserService;
@@ -20,7 +19,7 @@ class RegisterController extends Controller
         private UserService $userService,
     ) { }
 
-    public function store(StoreUserRequest $request)
+    public function store(StoreUserRequest $request): JsonResponse
     {
         $newUser = $this->userService->createNewUser(StoreUserDTO::makeFromRequest($request));
 
@@ -31,9 +30,9 @@ class RegisterController extends Controller
             ], 500);
         }
 
-        $linkVerification = $this->authService->createLinkVerification();
+        $linkVerification = $this->authService->createLinkVerification('verify');
 
-        $this->emailVerify($newUser->email, $linkVerification['hash']);
+        $this->verify($newUser->email, $linkVerification['hash']);
 
         SendEmailVerificationJob::dispatch($newUser->email, $linkVerification['link'])->onQueue('queue_notification');
 
@@ -43,8 +42,9 @@ class RegisterController extends Controller
         ], 201);
 
 
-        // return response()->json(['data' => $newUser]);
-
+        /**
+         * Esse trecho de código é para realizar login automatico após o registro do usuário
+         */
         // Cria o token de acesso do usuário
         // $token = $user->createToken($request->device_name)->plainTextToken;
         // $user['token'] = $token;
@@ -54,14 +54,14 @@ class RegisterController extends Controller
         // ]);
     }
 
-    private function emailVerify(string $email, string $hash): bool|JsonResponse
+    private function verify(string $email, string $hash): bool|JsonResponse
     {
         $emailVerify = $this->emailVerificationService->store($email, $hash);
 
         if(!$emailVerify) {
             return response()->json([
                 'status' => 'failed',
-                'message' => "Unable to send verification link to email {$email}. Please resend the link."
+                'message' => "Não foi possível enviar o link de verificação para {$email}. Por favor, tente novamente."
             ], 422);
         }
 

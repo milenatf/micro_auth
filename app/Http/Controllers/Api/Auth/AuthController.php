@@ -8,6 +8,7 @@ use App\Http\Resources\User\UserResource;
 use App\Services\User\UserService;
 use Illuminate\Support\Facades\Hash;
 use Exception;
+use Illuminate\Http\JsonResponse;
 
 class AuthController extends Controller
 {
@@ -15,7 +16,7 @@ class AuthController extends Controller
         private UserService $userService
     ) { }
 
-    public function login(AuthUser $request)
+    public function login(AuthUser $request): JsonResponse
     {
         $user = $this->userService->getUserByEmail($request->email);
 
@@ -26,7 +27,7 @@ class AuthController extends Controller
             ], 404);
         }
 
-        if(!$user->email_verified_at)
+        if(!$user->hasVerifiedEmail())
         {
             return response()->json([
                 'status' => 'failed',
@@ -36,7 +37,7 @@ class AuthController extends Controller
 
         if (! $user || ! Hash::check($request->password, $user->password)) {
             return response()->json([
-                'status' => 'erro',
+                'status' => 'failed',
                 'mensagem' => 'Email e/ou senha estão incorretos.'
             ], 422);
         }
@@ -58,7 +59,7 @@ class AuthController extends Controller
         return response()->json($user->only('token'), 200);
     }
 
-    public function me()
+    public function me(): UserResource|JsonResponse
     {
         /** @var User $authUser */
         $authUser = auth()->user();
@@ -73,7 +74,7 @@ class AuthController extends Controller
         return new UserResource($authUser);
     }
 
-    public function logout()
+    public function logout(): JsonResponse
     {
         /** @var User $authUser */
         $authUser = auth()->user();
@@ -91,7 +92,7 @@ class AuthController extends Controller
         ], 200);
     }
 
-    public function validateToken()
+    public function validateToken(): JsonResponse
     {
         try {
             $user = auth()->user();
